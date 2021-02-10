@@ -16,11 +16,12 @@ var storage = multer.diskStorage({
 });
 
 var upload = multer({ storage: storage });
-
+console.log(upload, "mour");
 export default (req, res) => {
-  upload.array("iphoneAdPix", 3)(req, {}, (err) => {
+  upload.array("iphoneAdPix", 4)(req, {}, (err) => {
     // do error handling here
-    console.log(req.files); // do something with the files here
+
+    console.log(req.files, "mario"); // do something with the files here
   });
   res.status(200).send({});
 };
