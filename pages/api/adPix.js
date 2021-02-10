@@ -1,27 +1,18 @@
-import multer from "multer";
+let multiparty = require("multiparty");
+let http = require("http");
+let util = require("util");
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-
-var upload = multer({ storage: storage });
-console.log(upload, "mour");
-export default (req, res) => {
-  upload.array("iphoneAdPix", 4)(req, {}, (err) => {
-    // do error handling here
-
-    console.log(req.files, "mario"); // do something with the files here
-  });
-  res.status(200).send({});
+module.exports = (req, res) => {
+  if (req.method === "POST") {
+    let form = new multiparty.Form();
+    form.parse(req, (err, fields, files) => {
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.write("received upload: \n\n");
+      res.end(util.inspect({ fields: fields, files: files }));
+    });
+    return;
+  } else {
+    res.end("Send a POST request.");
+    return;
+  }
 };
