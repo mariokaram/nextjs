@@ -8,6 +8,11 @@
     "start": "next start"
   },
   "dependencies": {
+    "@uppy/core": "^1.16.1",
+    "@uppy/react": "^1.11.3",
+    "@uppy/thumbnail-generator": "^1.7.6",
+    "@uppy/xhr-upload": "^1.7.0",
+    "multer": "^1.4.2",
     "next": "10.0.5",
     "react": "17.0.1",
     "react-dom": "17.0.1"

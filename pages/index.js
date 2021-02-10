@@ -1,70 +1,82 @@
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
-import Image from "next/image";
-export default function Home() {
+import Uppy from "@uppy/core";
+import { DragDrop } from "@uppy/react";
+import ThumbnailGenerator from "@uppy/thumbnail-generator";
+import XHRUpload from "@uppy/xhr-upload";
+
+const uppy = new Uppy({
+  meta: { type: "iphoneAdPix" },
+  restrictions: {
+    maxNumberOfFiles: 3,
+    maxFileSize: 1048576 * 4,
+    allowedFileTypes: [".jpg", ".jpeg", ".png", ".docx"],
+  },
+  autoProceed: true,
+});
+
+uppy.use(XHRUpload, {
+  endpoint: "/api/adPix",
+  fieldName: "iphoneAdPix",
+  formData: true,
+});
+
+uppy.use(ThumbnailGenerator, {
+  thumbnailWidth: 200,
+  waitForThumbnailsBeforeUpload: false,
+});
+
+uppy.on("thumbnail:generated", (file, preview) => {
+  console.log(file.name, preview);
+});
+
+uppy.on("complete", (result) => {
+  const url = result.successful[0].uploadURL;
+  console.log("successful upload", result);
+});
+
+uppy.on("error", (error) => {
+  console.error(error.stack);
+});
+
+uppy.on("restriction-failed", (file, error) => {
+  const err = error.stack.includes("exceeds maximum allowed size of 4 MB")
+    ? "A fájl mérete nagyobb mint 4MB"
+    : error;
+
+  alert(
+    "Feltöltési hiba: " +
+      err +
+      "\n" +
+      file.name +
+      " Mérete : " +
+      Math.round(file.size / 1024 / 1024) +
+      "MB"
+  );
+});
+
+/*
+
+    From:   https://uppy.io/examples/dashboard/
+            https://uppy.io/docs/react/
+
+ */
+
+const ImageUpload = () => {
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{" "}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <h1>My Homepage</h1>
-            <Image
-              src="/me.png"
-              alt="Picture of the author"
-              width={500}
-              height={500}
-            />
-            <p>Welcome to my homepage!</p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+    <div>
+      <DragDrop
+        uppy={uppy}
+        locale={{
+          strings: {
+            // Text to show on the droppable area.
+            // `%{browse}` is replaced with a link that opens the system file selection dialog.
+            dropHereOr: "drop here %{browse}",
+            // Used as the label for the link that opens the system file selection dialog.
+            browse: "browse",
+          },
+        }}
+      />
     </div>
   );
-}
+};
+
+export default ImageUpload;
